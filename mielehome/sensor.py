@@ -1,9 +1,6 @@
 from custom_components.mielehome import DOMAIN
 from homeassistant.helpers.entity import Entity
 
-# Dependencies
-DEPENDENCIES = ['mielehome']
-
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Initialize the Miele@Home device."""
     sensors = [MieleSensor(device, 'Status') for device in hass.data[DOMAIN]]
