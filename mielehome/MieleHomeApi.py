@@ -80,17 +80,24 @@ class MieleHomeDevice:
     def _get_date_str(self):
         return datetime.datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
 
-    def get_raw(self, resource):
-        url = 'http://{}{}'.format(self.host, resource)
-        date = self._get_date_str()
-        signature = self._get_signature(resource, date)
+    def _get_headers(self, date=None, auth=None):
+        if date is None:
+            date = self._get_date_str()
         headers = {
             'Accept': 'application/vnd.miele.v1+json',
             'User-Agent': 'Miele@mobile 2.3.3 Android',
             'Host': self.host,
             'Date': date,
-            'Authorization': 'MieleH256 {}:{}'.format(self.group_id.hex(), signature.hexdigest().upper()),
         }
+        if auth is not None:
+            headers['Authorization'] = auth
+        return headers
+
+    def get_raw(self, resource):
+        url = 'http://{}{}'.format(self.host, resource)
+        date = self._get_date_str()
+        signature = self._get_signature(resource, date)
+        headers = self._get_headers(date=date, auth='MieleH256 {}:{}'.format(self.group_id.hex(), signature.hexdigest().upper()))
         response = requests.get(url, headers=headers, timeout=self.timeout)
         response.raise_for_status
         response_signature = binascii.a2b_hex(response.headers['X-Signature'].split(':')[1])
@@ -116,3 +123,15 @@ class MieleHomeDevice:
         devices = self.getDevices()
         firstDevices = list(devices.keys())[0]
         return devices.get(firstDevices).get('Ident')
+
+    def register(self):
+        headers = self._get_headers()
+        url = 'http://{}/Security/Commissioning/'.format(self.host)
+        body = {
+            'GroupID': self.group_id.hex(),
+            'GroupKey': self.group_key.hex(),
+        }
+        response = requests.put(url, json=body, headers=headers, timeout=self.timeout)
+        print(response)
+        return response
+
