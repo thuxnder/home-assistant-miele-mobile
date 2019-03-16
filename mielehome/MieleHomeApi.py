@@ -131,7 +131,22 @@ class MieleHomeDevice:
             'GroupID': self.group_id.hex(),
             'GroupKey': self.group_key.hex(),
         }
-        response = requests.put(url, json=body, headers=headers, timeout=self.timeout)
-        print(response)
-        return response
+        return requests.put(url, json=body, headers=headers, timeout=self.timeout)
 
+
+def easySetup():
+    import random
+    ip = input('Enter IP: ')
+    group_id = '%016x' % random.randrange(16**16)
+    group_key = '%0128x' % random.randrange(16**128)
+    device = MieleHomeDevice(ip, bytes.fromhex(group_id), bytes.fromhex(group_key))
+
+    retry = 5
+    while retry:
+        response = device.register()
+        if response.status_code == 200:
+            print('''mielehome:\n  devices:\n    - host: {}\n      entity_id: '{}'\n      group_id: '{}'\n      group_key: '{}' '''.format(ip, list(device.getDevices().keys())[0], group_id, group_key))
+            break
+        retry -= 1
+    else:
+        print('Failed.')
