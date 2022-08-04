@@ -18,7 +18,7 @@ python -c 'from MieleHomeApi import easySetup; easySetup()'
 ```
 
 ### Use existing keys (advanced)
-If you want to use the Miele@mobile app and this API at the same time you have to get the GroupID and GroupKey from the app. This can be achieved by sniffing them off the network when the app is setting up the appliance, look for a http request like this:
+If you want to use the Miele@mobile app and this API at the same time you have to get the GroupID and GroupKey from the app. This can be achieved by sniffing them off the network when the app is setting up the appliance. Look for a http request like this:
 ```
 HTTP: PUT /Security/Commissioning/ HTTP/1.1
 ```
